@@ -16,11 +16,13 @@ your own code** and wire it into your team's process.
 ```bash
 # 1. Clone this pack
 git clone https://github.com/coleam00/ai-native-starter-pack
-# 2. Copy the AI Layer into your project
+# 2. Copy the AI Layer into your project (skills/agents/references + the Atlassian .mcp.json)
 cp -r ai-native-starter-pack/.claude <your-repo>/.claude
+cp ai-native-starter-pack/.mcp.json <your-repo>/.mcp.json
 # 3. In your repo, derive your rules from your real code:
 #    run  /create-rules   → writes CLAUDE.md + .claude/context/ (cited to your code)
-# 4. (optional) wire external context: add a .mcp.json for the Atlassian MCP, then
+# 4. Wire external context: the pack ships a .mcp.json for the Atlassian MCP (Jira +
+#    Confluence) — edit/replace it for your stack — then
 #    run  /prime <jira-keys> <confluence-page-ids>
 ```
 
@@ -60,6 +62,7 @@ cp -r ai-native-starter-pack/.claude <your-repo>/.claude
 
 **Agents:** `code-reviewer`, `system-reviewer`, `research-agent`
 **References (universal best-practice):** `architecture-patterns`, `backend-api-best-practices`, `frontend-component-best-practices`, `vertical-slice-architecture`
+**MCP wiring:** `.mcp.json` — ships pointing at the **Atlassian MCP** (Jira + Confluence) so `prime` can pull tickets + linked spec pages out of the box; edit it to point at your own stack.
 
 ## Relationship to the Dynamous Agentic Coding course
 
