@@ -310,6 +310,14 @@ Design unit tests with fixtures and assertions following existing testing approa
 
 <List specific edge cases that must be tested for this feature>
 
+### E2E / Browser Automation
+
+<Identify the user-facing flows that must be validated in a real browser using the `agent-browser` skill>
+
+- Happy path: <describe the primary success flow and the URL/element assertions that confirm it>
+- Error paths: <list key error scenarios and the UI signals that confirm correct error handling>
+- Screenshots required: list the moments where a screenshot must be saved as evidence
+
 ---
 
 ## VALIDATION COMMANDS
@@ -334,7 +342,33 @@ Execute every command to ensure zero regressions and 100% feature correctness.
 
 <Feature-specific manual testing steps - API calls, UI testing, etc.>
 
-### Level 5: Additional Validation (Optional)
+### Level 5: E2E / Browser Automation
+
+Run the `agent-browser` skill to validate the feature end-to-end in a real browser.
+
+```bash
+# Start dev server (use project's start command from CLAUDE.md)
+<project-start-command>
+
+# Drive the browser
+agent-browser open http://localhost:<port>/<feature-route>
+agent-browser snapshot -i
+# Exercise happy path: fill inputs, click buttons, assert success state
+agent-browser screenshot screenshots/<ticket-id>-happy-path.png
+
+# Exercise key error/edge paths
+# e.g. submit empty form, unauthorized access, invalid input
+agent-browser screenshot screenshots/<ticket-id>-error-state.png
+
+# Assert no console errors
+agent-browser errors
+agent-browser close
+```
+
+Save all screenshots to `screenshots/` and include the paths in the completion checklist.
+See `.claude/skills/agent-browser/SKILL.md` for the full command reference and E2E Testing Protocol.
+
+### Level 6: Additional Validation (Optional)
 
 <MCP servers or additional CLI tools if available>
 
@@ -363,7 +397,8 @@ Execute every command to ensure zero regressions and 100% feature correctness.
 - [ ] All validation commands executed successfully
 - [ ] Full test suite passes (unit + integration)
 - [ ] No linting or type checking errors
-- [ ] Manual testing confirms feature works
+- [ ] Level 5 agent-browser E2E validation passed (screenshots saved to `screenshots/`)
+- [ ] Manual testing confirms feature works (Level 4)
 - [ ] Acceptance criteria all met
 - [ ] Code reviewed for quality and maintainability
 

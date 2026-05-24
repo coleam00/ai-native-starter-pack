@@ -10,6 +10,8 @@ argument-hint: [jira-issue-keys] [confluence-page-ids]
 
 Build targeted understanding of the backend codebase by analyzing its structure, routes, services, and data layer. Loading only backend context keeps the context window light on complex full-stack codebases. If external task references are provided, load them first so the analysis is anchored to the actual work.
 
+> **Scope discipline:** Limit all file reads to the backend root and its dependencies. Do NOT load the entire codebase — on large repos this exhausts the context window before any useful work is done.
+
 ## Process
 
 ### Step 0: Load External Context
