@@ -64,6 +64,24 @@ cp ai-native-starter-pack/.mcp.json <your-repo>/.mcp.json
 **References (universal best-practice):** `architecture-patterns`, `backend-api-best-practices`, `frontend-component-best-practices`, `vertical-slice-architecture`
 **MCP wiring:** `.mcp.json` — ships pointing at the **Atlassian MCP** (Jira + Confluence) so `prime` can pull tickets + linked spec pages out of the box; edit it to point at your own stack.
 
+## The diagrams from the workshop
+
+Both maps from the live session, free to reuse.
+
+### The same epic, two systems
+
+The whole workshop in one frame. Same Confluence epic down two paths: one where the team burns
+its time cleaning up slop, one where it ships. The only difference is the AI Layer.
+
+![Two-lane SDLC map](diagrams/two-lane-sdlc.png)
+
+### The AI-Native SDLC, in detail
+
+The same flow with the tool zones (Confluence, Jira, your IDE, GitHub), the artifact produced at
+each step, and the bug-to-rule loop that feeds the layer back into the next ticket.
+
+![The AI-Native SDLC in detail](diagrams/ai-native-sdlc-detailed.png)
+
 ## Relationship to the Dynamous Agentic Coding course
 
 This is a **focused subset** for the 2-hour workshop — enough to build the AI Layer and run
@@ -73,4 +91,5 @@ remote-coding, MCP, and Archon workflows. This pack is the on-ramp.
 
 ## License / use
 
-Internal / workshop use. (Private for now; intended to go public for workshop attendees.)
+Free to use. Built for attendees of the *"AI-Native Engineering Org Transformation"* workshop, but
+you don't need to have been there. Clone it, install it, make it yours.
