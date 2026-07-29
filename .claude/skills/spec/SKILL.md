@@ -1,6 +1,6 @@
 ---
 name: spec
-description: Slice an epic or next-epic doc into PIV-sized tickets with a dependency graph. Turns a large strategic doc into the discrete units of work that the PIV loop consumes. Accepts a Confluence page id OR a local PRD/epic doc path; optionally cross-references a Jira epic key. Writes the breakdown to docs/specs/ and, when the input was a Confluence page, publishes it back as a child page of the PRD. Can also file the tickets as Jira issues on request.
+description: Slice an epic or next-epic doc into PIV-sized tickets with a dependency graph. Turns a large strategic doc into the discrete units of work that the PIV loop consumes. Accepts a Confluence page id OR a local PRD/epic doc path; optionally cross-references a Jira epic key. Writes the breakdown to docs/specs/ and, when the input was a Confluence page, publishes it back as a child page of the PRD. When a Jira epic key is passed, it also creates the tickets as issues under that epic, skipping any that already exist.
 argument-hint: "[confluence-page-id OR local-doc-path] [optional-jira-epic-key]"
 ---
 
@@ -108,18 +108,35 @@ space to publish into.
 > Publishing is additive. The repo copy at `docs/specs/<epic-slug>.md` stays the source the PIV loop reads;
 > the Confluence page is the shareable view for people who do not live in the repo.
 
-### Step 6 (optional) — File the tickets in Jira
+### Step 6 — File the tickets in Jira
 
-Slicing produces a document, not issues. If the user asks for the tickets to actually exist, create them with
-`mcp__atlassian__createJiraIssue`: one issue per ticket, `parent` set to the epic key from `$2`, summary and
-description taken from the breakdown. **Only do this when explicitly asked.** Never create issues as a side
-effect of running `/spec`.
+**If `$2` (a Jira epic key) was provided, this step is REQUIRED.** A breakdown nobody can assign is only half
+the job. Create the tickets for real:
+
+1. Get the `cloudId` via `mcp__atlassian__getAccessibleAtlassianResources` if not already fetched.
+2. Read the epic with `mcp__atlassian__getJiraIssue` to learn its `project` key and confirm it exists.
+3. **Check for existing children first.** Run `mcp__atlassian__searchJiraIssuesUsingJql` with
+   `parent = <epic-key>`. For every ticket in your breakdown, compare against those summaries.
+   - If a child already covers that slice, **skip it** and report it as already existing.
+   - Only create the slices that are genuinely missing. Never create a near-duplicate of an existing child.
+4. For each missing slice call `mcp__atlassian__createJiraIssue` with:
+   - `cloudId`, `projectKey` (from step 2), `issueTypeName: "Story"` (or `"Task"` for pure chores)
+   - `parent_epic`/`parent` = the epic key from `$2`
+   - `summary` = the ticket title from your breakdown
+   - `description` = scope, acceptance criteria, files likely touched, and the `Depends on:` line
+5. Report a table of what you created (key + summary + URL) and what you skipped as already present.
+
+If `$2` was **not** provided, skip this step and tell the user which epic key to pass to file the tickets.
+
+> Order matters: write the breakdown document first (Step 4), publish to Confluence (Step 5), then create
+> issues. If issue creation fails partway, the breakdown still exists and the run is re-runnable, because
+> step 3 makes creation idempotent.
 
 ## Output
 
 1. A ticket breakdown at `docs/specs/<epic-slug>.md` (always).
 2. A Confluence child page under the PRD (when the input was a Confluence page id).
-3. Jira issues (only when explicitly requested, see Step 6).
+3. Real Jira issues under the epic, when an epic key was passed (Step 6). Existing children are never duplicated.
 
 Each ticket then enters its own PIV loop starting at `/prime` → `/plan-feature`.
 
