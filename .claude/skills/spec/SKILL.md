@@ -1,6 +1,6 @@
 ---
 name: spec
-description: Slice an epic or next-epic doc into PIV-sized tickets with a dependency graph. Turns a large strategic doc into the discrete units of work that the PIV loop consumes. Accepts a Confluence page id OR a local PRD/epic doc path; optionally cross-references a Jira epic key.
+description: Slice an epic or next-epic doc into PIV-sized tickets with a dependency graph. Turns a large strategic doc into the discrete units of work that the PIV loop consumes. Accepts a Confluence page id OR a local PRD/epic doc path; optionally cross-references a Jira epic key. Writes the breakdown to docs/specs/ and, when the input was a Confluence page, publishes it back as a child page of the PRD. Can also file the tickets as Jira issues on request.
 argument-hint: "[confluence-page-id OR local-doc-path] [optional-jira-epic-key]"
 ---
 
@@ -86,9 +86,42 @@ Write to `docs/specs/<epic-slug>.md`:
    Wave 2: TICKET-2 (after TICKET-1)
 ```
 
+### Step 5 — Publish the breakdown back to Confluence
+
+The breakdown is a PM artifact, so it belongs where the PM works, not only in the repo. If the PRD came from
+Confluence (i.e. `$1` was a page id), publish the breakdown as a **child page of the PRD**:
+
+1. Obtain the `cloudId` via `mcp__atlassian__getAccessibleAtlassianResources` if not already fetched.
+2. Look for an existing page titled `Spec: <epic name> - Ticket Breakdown` in the same space
+   (`mcp__atlassian__searchConfluenceUsingCql`, scoped to the space key).
+3. If none exists, call `mcp__atlassian__createConfluencePage` with:
+   - `cloudId`, the PRD's `spaceId`
+   - `parentId` = the PRD page id (so it nests under the PRD)
+   - `title` = `Spec: <epic name> - Ticket Breakdown`
+   - `body` = the same markdown you wrote in Step 4
+   If one already exists, call `mcp__atlassian__updateConfluencePage` instead, incrementing its version.
+4. Report the resulting page id and URL back to the user.
+
+If `$1` was a local file path rather than a Confluence page id, **skip this step** and say so. Do not invent a
+space to publish into.
+
+> Publishing is additive. The repo copy at `docs/specs/<epic-slug>.md` stays the source the PIV loop reads;
+> the Confluence page is the shareable view for people who do not live in the repo.
+
+### Step 6 (optional) — File the tickets in Jira
+
+Slicing produces a document, not issues. If the user asks for the tickets to actually exist, create them with
+`mcp__atlassian__createJiraIssue`: one issue per ticket, `parent` set to the epic key from `$2`, summary and
+description taken from the breakdown. **Only do this when explicitly asked.** Never create issues as a side
+effect of running `/spec`.
+
 ## Output
 
-A ticket breakdown at `docs/specs/<epic-slug>.md`. Each ticket then enters its own PIV loop starting at `/prime` → `/plan-feature`.
+1. A ticket breakdown at `docs/specs/<epic-slug>.md` (always).
+2. A Confluence child page under the PRD (when the input was a Confluence page id).
+3. Jira issues (only when explicitly requested, see Step 6).
+
+Each ticket then enters its own PIV loop starting at `/prime` → `/plan-feature`.
 
 ## Notes
 

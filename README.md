@@ -19,6 +19,8 @@ git clone https://github.com/coleam00/ai-native-starter-pack
 # 2. Copy the AI Layer into your project (skills/agents/references + the Atlassian .mcp.json)
 cp -r ai-native-starter-pack/.claude <your-repo>/.claude
 cp ai-native-starter-pack/.mcp.json <your-repo>/.mcp.json
+# 2b. Optional: the PR review workflow (needs a CLAUDE_CODE_OAUTH_TOKEN repo secret)
+cp -r ai-native-starter-pack/.github <your-repo>/.github
 # 3. In your repo, derive your rules from your real code:
 #    run  /create-rules   → writes CLAUDE.md + .claude/context/ (cited to your code)
 # 4. Wire external context: the pack ships a .mcp.json for the Atlassian MCP (Jira +

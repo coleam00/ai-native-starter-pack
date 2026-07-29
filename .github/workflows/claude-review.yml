@@ -1,0 +1,59 @@
+# Claude review — read-only. Runs the /code-review skill against the PR diff and
+# posts the review as a PR comment. Claude reads code and comments; it never writes
+# to the branch (contents: read).
+#
+# Fires automatically when a PR is opened, and on demand when a trusted contributor
+# comments `@claude-review`. Requires the CLAUDE_CODE_OAUTH_TOKEN repo/org secret.
+name: Claude Review
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-review:
+    if: |
+      github.event_name == 'pull_request' || (
+        github.event_name == 'issue_comment'
+        && github.event.issue.pull_request
+        && contains(github.event.comment.body, '@claude-review')
+        && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read         # read-only — the reviewer never edits the branch
+      pull-requests: write   # post the review as a comment
+      issues: write
+      id-token: write
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude code review
+        uses: anthropics/claude-code-action@v1
+        with:
+          allowed_bots: "dependabot"
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          trigger_phrase: "@claude-review"
+          track_progress: true
+          prompt: |
+            Run the /code-review skill on this pull request.
+
+            Review the full diff against the base branch. Check correctness,
+            security, error handling, test coverage, and CLAUDE.md compliance —
+            especially the CSV formula-injection rule (user-controlled fields
+            written to CSV cells must be escaped against =HYPERLINK and similar
+            formulas; see .claude/context/export-pattern.md) and the
+            "new endpoints use JWT, not the legacy session" rule.
+
+            Post the review as a single PR comment. Be specific — cite file:line for
+            every finding. Do not modify any files; this is a read-only review.
+          claude_args: |
+            --max-turns 60
