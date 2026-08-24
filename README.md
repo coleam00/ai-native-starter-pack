@@ -19,6 +19,10 @@ git clone https://github.com/coleam00/ai-native-starter-pack
 # 2. Copy the AI Layer into your project (skills/agents/references + the Atlassian .mcp.json)
 cp -r ai-native-starter-pack/.claude <your-repo>/.claude
 cp ai-native-starter-pack/.mcp.json <your-repo>/.mcp.json
+# 2a. Optional: turn on the two baseline hooks (env-file / rm -rf guardrail + an
+#     audit-log trail). Commit the resulting settings.json so your whole team
+#     inherits the guarantee.
+cp ai-native-starter-pack/.claude/settings.json.example <your-repo>/.claude/settings.json
 # 2b. Optional: the PR review workflow (needs a CLAUDE_CODE_OAUTH_TOKEN repo secret)
 cp -r ai-native-starter-pack/.github <your-repo>/.github
 # 3. In your repo, derive your rules from your real code:
@@ -65,6 +69,7 @@ cp -r ai-native-starter-pack/.github <your-repo>/.github
 **Agents:** `code-reviewer`, `system-reviewer`, `research-agent`
 **References (universal best-practice):** `architecture-patterns`, `backend-api-best-practices`, `frontend-component-best-practices`, `vertical-slice-architecture`
 **MCP wiring:** `.mcp.json` - ships pointing at the **Atlassian MCP** (Jira + Confluence) so `prime` can pull tickets + linked spec pages out of the box; edit it to point at your own stack.
+**Hooks:** `.claude/hooks/` - two generic, always-on guardrails (block reads of real secrets + `rm -rf`; log every tool call) plus `settings.json.example` to turn them on. See `.claude/hooks/README.md` for anything specific to your own workflow (a completion gate, an artifact hand-off between skills) - those have to be described to your agent, not copied from a generic pack.
 
 ## The diagrams from the workshop
 
